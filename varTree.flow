@@ -6,6 +6,8 @@ import math/math;
 
 export {
     getVarsTree(varString : string) -> Tree<string,int>;
+    varTree2s(tree : Tree<string,int>) -> string;
+    varList2s(tree : List<Pair<string, int>>) -> string;
 }
 
 getVarsArray(varString : string) -> [Pair]{
@@ -16,4 +18,18 @@ getVarsArray(varString : string) -> [Pair]{
 getVarsTree(varString : string) -> Tree<string,int>{
     varsArray = getVarsArray(varString);
     mapTree(pairs2tree(varsArray),s2i);
+}
+
+varTree2s(tree : Tree<string,int>) -> string{
+    list = tree2list(tree);
+    varList2s(list);
+}
+
+varList2s(list : List<Pair<string, int>>) -> string{
+    switch (list : List<Pair<string, int>>) {
+		EmptyList(): {""};
+		Cons(h, t): {
+			"{'" + h.first + "','" + i2s(h.second) + "'}  " + varList2s(t);
+		}
+	}
 }

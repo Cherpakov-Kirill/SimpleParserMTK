@@ -1,0 +1,75 @@
+import lingo/pegcode/driver;
+import varTree;
+import arExp;
+
+export {
+    AlgExp ::= AlgSum,AlgRes,AlgProd,AlgDiv,AlgInt,AlgVar;
+    AlgSum : (l:AlgExp,r:AlgExp);
+    AlgRes : (l:AlgExp,r:AlgExp);
+    AlgProd : (l:AlgExp,r:AlgExp);
+    AlgDiv : (l:AlgExp,r:AlgExp);
+    AlgInt : (val:int);
+    AlgVar : (value:string);
+
+    parseAlgExp(s:string)->Maybe<AlgExp>;
+    alg2s(e:AlgExp)-> string;
+
+    algCalculation(a: AlgExp, t: Tree<string, int>) -> Maybe<AlgExp>;
+    algTesting(algxp : AlgExp) -> void;
+}
+
+parseAlgExp(s:string)->Maybe<AlgExp>{
+    grammar="#include algexp.lingo";
+    parser=compilePegGrammar(grammar);
+    ret=parsic3(parser,s,defaultPegActions,AlgInt(0));
+    if(ret.third==""){
+        Some(ret.first);
+    }else{
+        None();
+    }
+}
+
+alg2s(e:AlgExp)-> string{
+    switch (e : AlgExp) {
+        AlgSum(l,r): { "("+alg2s(l)+"+"+alg2s(r)+")";}
+        AlgRes(l,r): { "("+alg2s(l)+"-"+alg2s(r)+")";}
+        AlgProd(l,r): { "("+alg2s(l)+"*"+alg2s(r)+")";}
+        AlgDiv(l,r): { "("+alg2s(l)+"/"+alg2s(r)+")";}
+        AlgVar(v): v;
+        AlgInt(v): { i2s(v);} 
+    }
+}
+
+algExp2arExp(e:AlgExp)-> ArExp{
+    switch (e : AlgExp) {
+        AlgSum(l,r): { ArSum(algExp2arExp(l),algExp2arExp(r));}
+        AlgRes(l,r): { ArRes(algExp2arExp(l),algExp2arExp(r));}
+        AlgProd(l,r): { ArProd(algExp2arExp(l),algExp2arExp(r));}
+        AlgDiv(l,r): { ArDiv(algExp2arExp(l),algExp2arExp(r));}
+        AlgVar(v): ArInt(0);
+        AlgInt(v): { ArInt(v);} 
+    }
+}
+
+algCalculation(a: AlgExp, t: Tree<string, int>) -> Maybe<AlgExp>{
+   switch(a : AlgExp){
+        AlgSum(l,r):  maybeMap2(\x,y -> AlgSum(x,y)) (algCalculation(l,t), algCalculation(r,t));
+        AlgRes(l,r):  maybeMap2(\x,y -> AlgRes(x,y)) (algCalculation(l,t), algCalculation(r,t));
+        AlgProd(l,r): maybeMap2(\x,y -> AlgProd(x,y))(algCalculation(l,t), algCalculation(r,t));
+        AlgDiv(l,r):  maybeMap2(\x,y -> AlgDiv(x,y)) (algCalculation(l,t), algCalculation(r,t));
+        AlgVar(v): maybeMap(lookupTree(t, v), \val -> AlgInt(val));
+        AlgInt(v): Some(AlgInt(v));
+    }
+}
+
+algTesting(algexp : AlgExp) -> void {
+    println("algTesting:");
+    println("\talgExp2s: " + alg2s(algexp));          
+
+    varsTree = getVarsTree(getFileContent("./input.txt"));
+    println("\tvarTree: " + varTree2s(varsTree));
+
+    arExpWithNumbers = algCalculation(algexp,varsTree);
+    println("\talgCalculation: " + alg2s(either(arExpWithNumbers,AlgInt(0))));
+    aeTesting(algExp2arExp(either(arExpWithNumbers,AlgInt(0))));
+}

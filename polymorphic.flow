@@ -96,9 +96,10 @@ evalRpn(rpnList:List<RpnPolE<?>>)-> Maybe<?>{
 }
 
 rpnPolTesting(arexp : ArExp) -> void{
+    println("rpnPolTesting:");
     rpni = ae2rpni(arexp);
-    println("rpni2s: " + rpni2s(rpni));
-    println("evalRpn int " + toString(either(evalRpn(rpni),-1)));
+    println("\trpni2s: " + rpni2s(rpni));
+    println("\tevalRpn int " + toString(either(evalRpn(rpni),-1)));
     rpnae = rpni2rpnae(rpni);
-    println("evalRpn ArExp " + toString(either(evalRpn(rpnae),ArInt(-1))));
+    println("\tevalRpn ArExp " + toString(either(evalRpn(rpnae),ArInt(-1))));
 }

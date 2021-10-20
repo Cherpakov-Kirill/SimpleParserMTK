@@ -7,14 +7,14 @@ export {
     ArProd : (l:ArExp,r:ArExp);
     ArDiv : (l:ArExp,r:ArExp);
     ArInt : (val:int);
-    parse(s:string)->Maybe<ArExp>;
+    parseArExp(s:string)->Maybe<ArExp>;
     ae2s(e:ArExp)-> string;
     ae2i(e:ArExp)-> int;
 
     aeTesting(arexp : ArExp) -> void;
 }
 
-parse(s:string)->Maybe<ArExp>{
+parseArExp(s:string)->Maybe<ArExp>{
     grammar="#include arexp.lingo";
     parser=compilePegGrammar(grammar);
     ret=parsic3(parser,s,defaultPegActions,ArInt(0));
@@ -46,6 +46,7 @@ ae2i(e:ArExp)-> int{
 }
 
 aeTesting(arexp : ArExp) -> void{
-    println("ae2s: " + ae2s(arexp));           
-    println("ae2i: " + toString(ae2i(arexp)));
+    println("aeTesting:");
+    println("\tarExp2s: " + ae2s(arexp));           
+    println("\tarExp2i: " + toString(ae2i(arexp)));
 }

@@ -108,9 +108,10 @@ rpn2i(rpnList:List<RpnE>)-> Maybe<int>{
 }
 
 rpnTesting(arexp : ArExp) -> void{
+    println("rpnTesting:");
     rpn = ae2rpn(arexp);
-    println("rpn2s: " + rpn2s(rpn));
-    println("rpn2i: " + toString(either(rpn2i(rpn),-1)));
+    println("\trpn2s: " + rpn2s(rpn));
+    println("\trpn2i: " + toString(either(rpn2i(rpn),-1)));
     aeFromRpn = either(rpn2ae(rpn),ArInt(-1));
     aeTesting(aeFromRpn);
 }

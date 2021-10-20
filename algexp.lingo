@@ -1,0 +1,9 @@
+s = sum|prod|res|div|int|var;
+sum = "("s:l"+"s:r")"{AlgSum(:l,:r)};
+res = "("s:l"-"s:r")"{AlgRes(:l,:r)};
+prod = "("s:l"*"s:r")"{AlgProd(:l,:r)};
+div = "("s:l"/"s:r")"{AlgDiv(:l,:r)};
+int = digit+$x{AlgInt(s2i($x))};
+var = sym+$x{AlgVar($x)};
+digit='0'-'9';
+sym = 'a'-'z';
