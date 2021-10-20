@@ -1,0 +1,19 @@
+import ds/tree;
+import ds/tuples;
+import string;
+import runtime;
+import math/math;
+
+export {
+    getVarsTree(varString : string) -> Tree<string,int>;
+}
+
+getVarsArray(varString : string) -> [Pair]{
+    vars = strSplit(varString, ",");
+    map(vars, \ elem -> Pair(strSplit(elem, "=")[0], strSplit(elem, "=")[1]));
+}
+
+getVarsTree(varString : string) -> Tree<string,int>{
+    varsArray = getVarsArray(varString);
+    mapTree(pairs2tree(varsArray),s2i);
+}

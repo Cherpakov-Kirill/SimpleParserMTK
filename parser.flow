@@ -1,6 +1,7 @@
 import arExp;
 import rpnE;
 import polymorphic;
+import varTree;
 
 main(){
     switch (parse("(1+((27/(4+5))-5))") : Maybe<ArExp>) {
@@ -8,10 +9,11 @@ main(){
             aeTesting(arexp);
             rpnTesting(arexp);
             rpnPolTesting(arexp);
-            
         }
         None():{
             println("None");     
         }
     }
+    varsTree = getVarsTree("a=1,b=2,c=4");
+    println("TreeList: " + toString(tree2list(varsTree)));
 }
