@@ -1,0 +1,28 @@
+import runtime;
+
+export{
+	StackPop(stack: Stack<?>, value: Maybe<?>);
+	Stack(list:List<?>);
+	makeStack() -> Stack<?>;
+    pushStack(stack:Stack<?>, element:?) -> Stack<?>;
+    popStack(stack:Stack<?>) -> StackPop<?>;
+}
+
+StackPop(stack: Stack<?>, value: Maybe<?>);
+
+Stack(list:List<?>);
+
+makeStack() -> Stack<?> {
+	Stack(makeList());
+}
+
+pushStack(stack:Stack<?>, element:?) -> Stack<?>{
+    Stack(Cons(element,stack.list));
+}
+
+popStack(stack:Stack<?>) -> StackPop<?>{
+    switch (stack.list) {
+		EmptyList(): StackPop(stack,None());
+		Cons(h, t): StackPop(Stack(t),Some(h));
+	}
+}

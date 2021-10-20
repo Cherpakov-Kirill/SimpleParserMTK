@@ -1,0 +1,8 @@
+s = sum|prod|res|div|int;
+sum = "("s:l"+"s:r")"{ArSum(:l,:r)};
+res = "("s:l"-"s:r")"{ArRes(:l,:r)};
+prod = "("s:l"*"s:r")"{ArProd(:l,:r)};
+div = "("s:l"/"s:r")"{ArDiv(:l,:r)};
+int = digit+$x{ArInt(s2i($x))};
+digit='0'-'9';
+

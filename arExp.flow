@@ -1,0 +1,51 @@
+import lingo/pegcode/driver;
+
+export {
+    ArExp ::= ArSum,ArRes,ArProd,ArDiv,ArInt;
+    ArSum : (l:ArExp,r:ArExp);
+    ArRes : (l:ArExp,r:ArExp);
+    ArProd : (l:ArExp,r:ArExp);
+    ArDiv : (l:ArExp,r:ArExp);
+    ArInt : (val:int);
+    parse(s:string)->Maybe<ArExp>;
+    ae2s(e:ArExp)-> string;
+    ae2i(e:ArExp)-> int;
+
+    aeTesting(arexp : ArExp) -> void;
+}
+
+parse(s:string)->Maybe<ArExp>{
+    grammar="#include arexp.lingo";
+    parser=compilePegGrammar(grammar);
+    ret=parsic3(parser,s,defaultPegActions,ArInt(0));
+    if(ret.third==""){
+        Some(ret.first);
+    }else{
+        None();
+    }
+}
+
+ae2s(e:ArExp)-> string{
+    switch (e : ArExp) {
+        ArSum(l,r): { "("+ae2s(l)+"+"+ae2s(r)+")";}
+        ArRes(l,r): { "("+ae2s(l)+"-"+ae2s(r)+")";}
+        ArProd(l,r): { "("+ae2s(l)+"*"+ae2s(r)+")";}
+        ArDiv(l,r): { "("+ae2s(l)+"/"+ae2s(r)+")";}
+        ArInt(v): { i2s(v);} 
+    }
+}
+
+ae2i(e:ArExp)-> int{
+    switch (e : ArExp) {
+        ArSum(l,r): { ae2i(l)+ae2i(r);}
+        ArRes(l,r): { ae2i(l)-ae2i(r);}
+        ArProd(l,r): { ae2i(l)*ae2i(r);}
+        ArDiv(l,r): { ae2i(l)/ae2i(r);}
+        ArInt(v): { v;}   
+    }
+}
+
+aeTesting(arexp : ArExp) -> void{
+    println("ae2s: " + ae2s(arexp));           
+    println("ae2i: " + toString(ae2i(arexp)));
+}

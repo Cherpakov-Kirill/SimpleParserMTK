@@ -1,0 +1,17 @@
+import arExp;
+//import rpnE;
+import polymorphic;
+
+main(){
+    switch (parse("(1+((27/(4+5))-5))") : Maybe<ArExp>) {
+        Some(arexp): {
+            aeTesting(arexp);
+            //rpnTesting(arexp);
+            rpnPolTesting(arexp);
+            
+        }
+        None():{
+            println("None");     
+        }
+    }
+}

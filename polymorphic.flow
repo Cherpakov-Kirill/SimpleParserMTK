@@ -1,0 +1,104 @@
+import stackUtils;
+import arExp;
+
+export {
+    RpnE<?> ::= RpnOp<?>, RpnArg<?>;
+    RpnArg : (val: ?);
+    RpnOp : (op: string, fn: (?, ?) -> ?);
+
+    ae2rpni(a: ArExp) -> List<RpnE<int>>;
+    rpni2rpnae(r : List<RpnE<int>>) -> List<RpnE<ArExp>>;
+    rpni2s(r: List<RpnE<int>>) -> string;
+    evalRpn(r : List<RpnE<?>>) -> Maybe<?>;
+
+    rpnPolTesting(arexp : ArExp) -> void;
+}
+
+ae2rpni(e:ArExp)-> List<RpnE<int>>{
+    switch (e : ArExp) {
+        ArSum(l,r): { 
+            list1 = concatList(ae2rpni(l),ae2rpni(r));
+            list2 = makeList1(RpnOp("+", \x, y -> x + y));
+            concatList(list1, list2);
+        }
+        ArRes(l,r): { 
+            list1 = concatList(ae2rpni(l),ae2rpni(r));
+            list2 = makeList1(RpnOp("-", \x, y -> x - y));
+            concatList(list1, list2);
+        }
+        ArProd(l,r): {
+            list1 = concatList(ae2rpni(l),ae2rpni(r));
+            list2 = makeList1(RpnOp("*", \x, y -> x * y));
+            concatList(list1, list2);
+        }
+        ArDiv(l,r): {
+            list1 = concatList(ae2rpni(l),ae2rpni(r));
+            list2 = makeList1(RpnOp("/", \x, y -> x / y));
+            concatList(list1, list2);
+        }
+        ArInt(v): { 
+            Cons(RpnArg(v), EmptyList());
+        }   
+    }
+}
+
+rpni2rpnae(r : List<RpnE<int>>) -> List<RpnE<ArExp>>{
+    mapList(r, \ e -> switch (e : RpnE<int>) {
+        RpnArg(v) : RpnArg(ArInt(v));
+        RpnOp(op, fn) : {
+            if(op == "+") { 
+                RpnOp(op, \a, b -> ArSum(a,b)) 
+            } else {
+                if(op == "-") { 
+                    RpnOp(op, \a, b -> ArRes(a,b)) 
+                } else {
+                    if(op == "*") { 
+                        RpnOp(op, \a, b -> ArProd(a,b)) 
+                    } else {
+                        RpnOp(op, \a, b -> ArDiv(a,b)) 
+                    }
+                }
+            }            
+        }
+    })
+}
+
+rpni2s(l: List<RpnE<int>>) -> string{
+    switch (l:List<RpnE<int>>) {
+		EmptyList(): {""};
+		Cons(h, t): {
+			switch (h : RpnE<int>) {
+                RpnArg(val): { i2s(val)+rpni2s(t);}
+                RpnOp(op,fn): { op+rpni2s(t);}
+            }
+		}
+	}
+}
+
+evalRpn(rpnList:List<RpnE<?>>)-> Maybe<?>{
+    popStack(
+        foldList(rpnList, makeStack(), \s, e -> 
+        switch (e: RpnE) {
+            RpnArg(v) : pushStack(s, v);
+            RpnOp(op, fn) : {
+                pop1 = popStack(s);
+                pop2 = popStack(pop1.stack);
+                eitherFn2(
+                    pop1.value, 
+                    pop2.value, 
+                    \a,b -> pushStack(pop2.stack, fn(b,a)),
+                    \a -> makeStack(),
+                    makeStack
+                    );
+            }
+        })
+    ).value;
+}
+
+rpnPolTesting(arexp : ArExp) -> void{
+    rpni = ae2rpni(arexp);
+    println("rpni2s: " + rpni2s(rpni));
+    println("evalRpn int " + toString(either(evalRpn(rpni),-1)));
+    rpnae = rpni2rpnae(rpni);
+    println("evalRpn ArExp " + toString(either(evalRpn(rpnae),ArInt(-1))));
+}

@@ -1,0 +1,116 @@
+import arExp;
+import stackUtils;
+
+export{
+    RpnE::=RpnOp,RpnArg;
+    RpnArg(val:int);
+    RpnOp(op:string,fn:(int, int)->int);
+
+    rpn2ae(l:List<RpnE>)-> Maybe<ArExp>;
+    ae2rpn(e:ArExp)-> List<RpnE>;
+    rpn2s(l:List<RpnE>)-> string;
+    rpn2i(rpnList:List<RpnE>)-> Maybe<int>;
+
+    rpnTesting(arexp : ArExp) -> void;
+}
+
+rpn2ae(rpnList:List<RpnE>)-> Maybe<ArExp>{
+    popStack(
+        foldList(rpnList, makeStack(), \s, e -> 
+        switch (e: RpnE) {
+            RpnArg(v) : pushStack(s, ArInt(v));
+            RpnOp(op, fn) : {
+                pop1 = popStack(s);
+                pop2 = popStack(pop1.stack);
+                pushStack(pop2.stack, 
+                    if(op == "+"){
+                        ArSum(
+                        either(pop2.value, ArInt(-1)),
+                        either(pop1.value, ArInt(-1))
+                        );
+                    }else if(op == "-"){
+                        ArRes(
+                        either(pop2.value, ArInt(-1)),
+                        either(pop1.value, ArInt(-1))
+                        );
+                    } else if(op == "*"){
+                        ArProd(
+                        either(pop2.value, ArInt(-1)),
+                        either(pop1.value, ArInt(-1))
+                        );
+                    }else {
+                        ArDiv(
+                        either(pop2.value, ArInt(-1)),
+                        either(pop1.value, ArInt(-1))
+                        );
+                    } 
+                );
+            }
+        })
+    ).value;
+}
+
+ae2rpn(e:ArExp)-> List<RpnE>{
+    switch (e : ArExp) {
+        ArSum(l,r): { 
+            list1 = concatList(ae2rpn(l),ae2rpn(r));
+            list2 = makeList1(RpnOp("+", \x, y -> x + y));
+            concatList(list1, list2);
+        }
+        ArRes(l,r): { 
+            list1 = concatList(ae2rpn(l),ae2rpn(r));
+            list2 = makeList1(RpnOp("-", \x, y -> x - y));
+            concatList(list1, list2);
+        }
+        ArProd(l,r): {
+            list1 = concatList(ae2rpn(l),ae2rpn(r));
+            list2 = makeList1(RpnOp("*", \x, y -> x * y));
+            concatList(list1, list2);
+        }
+        ArDiv(l,r): {
+            list1 = concatList(ae2rpn(l),ae2rpn(r));
+            list2 = makeList1(RpnOp("/", \x, y -> x / y));
+            concatList(list1, list2);
+        }
+        ArInt(v): { 
+            Cons(RpnArg(v), EmptyList());
+        }   
+    }
+}
+
+rpn2s(l:List<RpnE>)-> string{
+    switch (l:List<RpnE>) {
+		EmptyList(): {""};
+		Cons(h, t): {
+			switch (h : RpnE) {
+                RpnArg(val): { i2s(val)+rpn2s(t);}
+                RpnOp(op,fn): { op+rpn2s(t);}
+            }
+		}
+	}
+}
+
+rpn2i(rpnList:List<RpnE>)-> Maybe<int>{
+    popStack(
+        foldList(rpnList, makeStack(), \s, e -> 
+        switch (e: RpnE) {
+            RpnArg(v) : pushStack(s, v);
+            RpnOp(op, fn) : {
+                pop1 = popStack(s);
+                pop2 = popStack(pop1.stack);
+                pushStack(pop2.stack, fn(
+                    either(pop2.value, -1),
+                    either(pop1.value, -1)
+                    ));
+            }
+        })
+    ).value;
+}
+
+rpnTesting(arexp : ArExp) -> void{
+    rpn = ae2rpn(arexp);
+    println("rpn2s: " + rpn2s(rpn));
+    println("rpn2i: " + toString(either(rpn2i(rpn),-1)));
+    aeFromRpn = either(rpn2ae(rpn),ArInt(-1));
+    aeTesting(aeFromRpn);
+}
