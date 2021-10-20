@@ -1,5 +1,5 @@
 import stackUtils;
-import arExp;
+import ar/arExp;
 
 export {
     RpnPolE<?> ::= RpnPolOp<?>, RpnPolArg<?>;

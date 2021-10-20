@@ -15,7 +15,7 @@ export {
 }
 
 parseArExp(s:string)->Maybe<ArExp>{
-    grammar="#include arexp.lingo";
+    grammar="#include ar/arexp.lingo";
     parser=compilePegGrammar(grammar);
     ret=parsic3(parser,s,defaultPegActions,ArInt(0));
     if(ret.third==""){

@@ -1,6 +1,6 @@
 import lingo/pegcode/driver;
-import varTree;
-import arExp;
+import alg/varTree;
+import ar/arExp;
 
 export {
     AlgExp ::= AlgSum,AlgRes,AlgProd,AlgDiv,AlgInt,AlgVar;
@@ -19,7 +19,7 @@ export {
 }
 
 parseAlgExp(s:string)->Maybe<AlgExp>{
-    grammar="#include algexp.lingo";
+    grammar="#include alg/algexp.lingo";
     parser=compilePegGrammar(grammar);
     ret=parsic3(parser,s,defaultPegActions,AlgInt(0));
     if(ret.third==""){

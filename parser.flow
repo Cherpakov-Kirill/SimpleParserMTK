@@ -1,7 +1,7 @@
-import arExp;
-import algExp;
-import rpnE;
-import polymorphic;
+import ar/arExp;
+import alg/algExp;
+import rpn/rpnE;
+import rpn/polymorphicRpnE;
 
 
 main(){
