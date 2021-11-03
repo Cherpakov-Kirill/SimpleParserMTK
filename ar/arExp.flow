@@ -45,8 +45,74 @@ ae2i(e:ArExp)-> int{
     }
 }
 
+arSumSmp(l : ArExp, r : ArExp) -> ArExp{
+    simplifiedL = aeSmp(l);
+    simplifiedR = aeSmp(r);
+    if(simplifiedL == ArInt(0)){
+        simplifiedR;
+    } else if (simplifiedR == ArInt(0)){
+        simplifiedL;
+    } else if (simplifiedL == simplifiedR){
+        ArProd(ArInt(2), simplifiedL);
+    } else {
+        ArSum(simplifiedL,simplifiedR);
+    }
+}
+
+arResSmp(l : ArExp, r : ArExp) -> ArExp{
+    simplifiedL = aeSmp(l);
+    simplifiedR = aeSmp(r);
+    if (simplifiedL == simplifiedR){
+        ArInt(0);
+    } else if (simplifiedR == ArInt(0)){
+        simplifiedL;
+    } else {
+        ArRes(simplifiedL,simplifiedR);
+    }
+}
+
+arProdSmp(l : ArExp, r : ArExp) -> ArExp{
+    simplifiedL = aeSmp(l);
+    simplifiedR = aeSmp(r);
+    if(simplifiedL == ArInt(1)){
+        simplifiedR;
+    } else if (simplifiedR == ArInt(1)){
+        simplifiedL;
+    } else if (simplifiedL == ArInt(0) || simplifiedR == ArInt(0)){
+        ArInt(0);
+    } else {
+        ArProd(simplifiedL,simplifiedR);
+    }
+}
+
+arDivSmp(l : ArExp, r : ArExp) -> ArExp{
+    simplifiedL = aeSmp(l);
+    simplifiedR = aeSmp(r);
+    if (simplifiedR == ArInt(1)){
+        simplifiedL;
+    } else if (simplifiedL == simplifiedR){
+        ArInt(1);
+    } else {
+        ArDiv(simplifiedL,simplifiedR);
+    }
+}
+
+aeSmp(arexp : ArExp) -> ArExp{
+    switch (arexp : ArExp) {
+        ArSum(l,r): { arSumSmp(l,r);}
+        ArRes(l,r): { arResSmp(l,r);}
+        ArProd(l,r): { arProdSmp(l,r);}
+        ArDiv(l,r): { arDivSmp(l,r);}
+        ArInt(v): { ArInt(v);} 
+    }
+}
+
 aeTesting(arexp : ArExp) -> void{
     println("aeTesting:");
     println("\tarExp2s: " + ae2s(arexp));           
     println("\tarExp2i: " + toString(ae2i(arexp)));
+
+    simpleAe = aeSmp(arexp);
+    println("\taeSmp: " + ae2s(simpleAe));
+    println("\taeSmp2i: " + toString(ae2i(simpleAe)));
 }

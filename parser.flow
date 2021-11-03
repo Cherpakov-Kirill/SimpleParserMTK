@@ -5,7 +5,7 @@ import rpn/polymorphicRpnE;
 
 
 main(){
-    switch (parseArExp("(1+((27/(4+5))-5))") : Maybe<ArExp>) {
+    switch (parseArExp(getFileContent("./ar/inputArExp.txt")) : Maybe<ArExp>) {
         Some(arexp): {
             aeTesting(arexp);
             rpnTesting(arexp);
@@ -15,7 +15,7 @@ main(){
             println("None");     
         }
     }
-    switch (parseAlgExp("(a+((b/(4+5))-c))") : Maybe<AlgExp>) {
+    switch (parseAlgExp(getFileContent("./alg/inputAlgExp.txt")) : Maybe<AlgExp>) {
         Some(algexp): {
             algTesting(algexp);
         }
@@ -23,6 +23,4 @@ main(){
             println("None");     
         }
     }
-    
-
 }

@@ -40,14 +40,14 @@ alg2s(e:AlgExp)-> string{
     }
 }
 
-algExp2arExp(e:AlgExp)-> ArExp{
+algExp2arExp(e:AlgExp)-> Maybe<ArExp>{
     switch (e : AlgExp) {
-        AlgSum(l,r): { ArSum(algExp2arExp(l),algExp2arExp(r));}
-        AlgRes(l,r): { ArRes(algExp2arExp(l),algExp2arExp(r));}
-        AlgProd(l,r): { ArProd(algExp2arExp(l),algExp2arExp(r));}
-        AlgDiv(l,r): { ArDiv(algExp2arExp(l),algExp2arExp(r));}
-        AlgVar(v): ArInt(0);
-        AlgInt(v): { ArInt(v);} 
+        AlgSum(l,r): { maybeMap2(\x,y -> ArSum(x,y)) (algExp2arExp(l), algExp2arExp(r));}
+        AlgRes(l,r): { maybeMap2(\x,y -> ArRes(x,y)) (algExp2arExp(l), algExp2arExp(r));}
+        AlgProd(l,r): { maybeMap2(\x,y -> ArProd(x,y)) (algExp2arExp(l), algExp2arExp(r));}
+        AlgDiv(l,r): { maybeMap2(\x,y -> ArDiv(x,y)) (algExp2arExp(l), algExp2arExp(r));}
+        AlgVar(v): None();
+        AlgInt(v): { Some(ArInt(v));} 
     }
 }
 
@@ -62,14 +62,183 @@ algCalculation(a: AlgExp, t: Tree<string, int>) -> Maybe<AlgExp>{
     }
 }
 
+haveParameter(a: AlgExp, parameter : string) -> bool{
+    //println("\thaveParameter: " + alg2s(a));
+    switch(a){
+        AlgSum(l,r):  {
+            left = haveParameter(l,parameter);
+            right = haveParameter(r,parameter);
+            ret = left || right;
+            //println("\t\t"+alg2s(a)+"  Return = " + b2s(ret));
+            ret;
+        }
+        AlgRes(l,r):  {
+            left = haveParameter(l,parameter);
+            right = haveParameter(r,parameter);
+            ret = left || right;
+            //println("\t\t"+alg2s(a)+"  Return = " + b2s(ret));
+            ret;
+        }
+        AlgProd(l,r): {
+            left = haveParameter(l,parameter);
+            right = haveParameter(r,parameter);
+            ret = left || right;
+            //println("\t\t"+alg2s(a)+"  Return = " + b2s(ret));
+            ret;
+        }
+        AlgDiv(l,r): {
+            left = haveParameter(l,parameter);
+            right = haveParameter(r,parameter);
+            ret = left || right;
+            //println("\t\t"+alg2s(a)+"  Return = " + b2s(ret));
+            ret;
+        }
+        AlgVar(v): {
+            if(v == parameter){
+                ret = true;
+                //println("\t\t"+alg2s(a)+"  Return = " + b2s(ret));
+                ret;
+            } else {
+                ret = false;
+                //println("\t\t"+alg2s(a)+"  Return = " + b2s(ret));
+                ret;
+            }
+        }
+        AlgInt(v): {
+            ret = false;
+            //println("\t\t"+alg2s(a)+"  Return = " + b2s(ret));
+            ret;
+        }
+    }
+}
+
+algDiff(a: AlgExp, parameter : string) -> AlgExp{
+    switch(a){
+        AlgSum(l,r):  {
+            if(haveParameter(a,parameter)){
+                AlgSum(algDiff(l,parameter), algDiff(r,parameter));
+            } else {
+                AlgInt(0);
+            }
+        }
+        AlgRes(l,r):  {
+            if(haveParameter(a,parameter)){
+                AlgRes(algDiff(l,parameter), algDiff(r,parameter));
+            } else {
+                AlgInt(0);
+            }
+        }
+        AlgProd(l,r): {
+            if(haveParameter(a,parameter)){
+                AlgSum(AlgProd(algDiff(l,parameter), r), AlgProd(l, algDiff(r,parameter)));
+            } else {
+                AlgInt(0);
+            }
+        }
+        AlgDiv(l,r): {
+            if(haveParameter(a,parameter)){
+                AlgDiv( AlgRes(AlgProd(algDiff(l,parameter), r), AlgProd(l, algDiff(r,parameter))), AlgProd(r,r));
+            } else {
+                AlgInt(0);
+            }
+        }
+        AlgVar(v): {
+             if(haveParameter(a,parameter)){
+                AlgInt(1);
+            } else{
+                AlgInt(0);
+            }
+        }
+        AlgInt(v): AlgInt(0);
+    }
+}
+
+algSumSmp(l : AlgExp, r : AlgExp) -> AlgExp{
+    simplifiedL = algSmp(l);
+    simplifiedR = algSmp(r);
+    if(simplifiedL == AlgInt(0)){
+        simplifiedR;
+    } else if (simplifiedR == AlgInt(0)){
+        simplifiedL;
+    } else if (simplifiedL == simplifiedR){
+        AlgProd(AlgInt(2), simplifiedL);
+    } else {
+        AlgSum(algSmp(l),simplifiedR);
+    }
+}
+
+algResSmp(l : AlgExp, r : AlgExp) -> AlgExp{
+    simplifiedL = algSmp(l);
+    simplifiedR = algSmp(r);
+    if (simplifiedL == simplifiedR){
+        AlgInt(0);
+    } else if (simplifiedR == AlgInt(0)){
+        simplifiedL;
+    } else {
+        AlgRes(simplifiedL,simplifiedR);
+    }
+}
+
+algProdSmp(l : AlgExp, r : AlgExp) -> AlgExp{
+    simplifiedL = algSmp(l);
+    simplifiedR = algSmp(r);
+    if(simplifiedL == AlgInt(1)){
+        simplifiedR;
+    } else if (simplifiedR == AlgInt(1)){
+        simplifiedL;
+    } else if (simplifiedL == AlgInt(0) || simplifiedR == AlgInt(0)){
+        AlgInt(0);
+    } else {
+        AlgProd(simplifiedL,simplifiedR);
+    }
+}
+
+algDivSmp(l : AlgExp, r : AlgExp) -> AlgExp{
+    simplifiedL = algSmp(l);
+    simplifiedR = algSmp(r);
+    if (simplifiedR == AlgInt(1)){
+        simplifiedL;
+    } else if (simplifiedL == simplifiedR){
+        AlgInt(1);
+    } else {
+        AlgDiv(simplifiedL,simplifiedR);
+    }
+}
+
+algSmp(algexp : AlgExp) -> AlgExp{
+    switch (algexp : AlgExp) {
+        AlgSum(l,r): { algSumSmp(l,r);}
+        AlgRes(l,r): { algResSmp(l,r);}
+        AlgProd(l,r): { algProdSmp(l,r);}
+        AlgDiv(l,r): { algDivSmp(l,r);}
+        AlgVar(v): AlgVar(v);
+        AlgInt(v): { AlgInt(v);} 
+    }
+}
+
 algTesting(algexp : AlgExp) -> void {
     println("algTesting:");
-    println("\talgExp2s: " + alg2s(algexp));          
+    println("\talgExp2s: " + alg2s(algexp));
 
-    varsTree = getVarsTree(getFileContent("./input.txt"));
+    diffAlg = algDiff(algexp,"b");
+    println("\talgDiff: " + alg2s(diffAlg));
+
+    simpleDiffAlg = algSmp(diffAlg);
+    println("\talgDiffSmp: " + alg2s(simpleDiffAlg));
+
+    simpleAlg = algSmp(algexp);
+    println("\n\talgSmp: " + alg2s(simpleAlg));
+
+    diffSimplifiedAlg = algDiff(simpleAlg,"b");
+    println("\talgDiffSimplified: " + alg2s(diffSimplifiedAlg));
+
+    simpleDiffSimplifiedAlg = algSmp(diffSimplifiedAlg);
+    println("\talgDiffSimplifiedSmp: " + alg2s(simpleDiffSimplifiedAlg));
+
+    varsTree = getVarsTree(getFileContent("./alg/inputParametersValues.txt"));
     println("\tvarTree: " + varTree2s(varsTree));
 
     arExpWithNumbers = algCalculation(algexp,varsTree);
     println("\talgCalculation: " + alg2s(either(arExpWithNumbers,AlgInt(0))));
-    aeTesting(algExp2arExp(either(arExpWithNumbers,AlgInt(0))));
+    aeTesting(either(algExp2arExp(either(arExpWithNumbers,AlgInt(0))),ArInt(0)));
 }
