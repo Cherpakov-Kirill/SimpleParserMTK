@@ -220,7 +220,7 @@ algTesting(algexp : AlgExp) -> void {
     println("algTesting:");
     println("\talgExp2s: " + alg2s(algexp));
 
-    diffAlg = algDiff(algexp,"b");
+    diffAlg = algDiff(algexp,"x");
     println("\talgDiff: " + alg2s(diffAlg));
 
     simpleDiffAlg = algSmp(diffAlg);
@@ -229,7 +229,7 @@ algTesting(algexp : AlgExp) -> void {
     simpleAlg = algSmp(algexp);
     println("\n\talgSmp: " + alg2s(simpleAlg));
 
-    diffSimplifiedAlg = algDiff(simpleAlg,"b");
+    diffSimplifiedAlg = algDiff(simpleAlg,"x");
     println("\talgDiffSimplified: " + alg2s(diffSimplifiedAlg));
 
     simpleDiffSimplifiedAlg = algSmp(diffSimplifiedAlg);
