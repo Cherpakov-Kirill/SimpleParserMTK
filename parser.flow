@@ -2,6 +2,7 @@ import ar/arExp;
 import alg/algExp;
 import rpn/rpnE;
 import rpn/polymorphicRpnE;
+import rational/rational;
 
 
 main(){
@@ -18,6 +19,14 @@ main(){
     switch (parseAlgExp(getFileContent("./alg/inputAlgExp.txt")) : Maybe<AlgExp>) {
         Some(algexp): {
             algTesting(algexp);
+        }
+        None():{
+            println("None");     
+        }
+    }
+    switch (parseAlgExp(getFileContent("./rational/inputRational.txt")) : Maybe<AlgExp>) {
+        Some(algexp): {
+            rationalTesting(algexp);
         }
         None():{
             println("None");     

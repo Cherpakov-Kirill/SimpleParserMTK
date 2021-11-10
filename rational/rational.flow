@@ -1,0 +1,143 @@
+import alg/algExp;
+
+export{
+    Monom    : (m : Tree<string, int>); //var and degree
+    Poly   : (p : Tree<Monom, int>);    //monom and coef.
+    RatExp : (numerator : Poly, denominator : Poly);
+
+    alg2rat(a: AlgExp) -> RatExp;
+    rat2s(rat:RatExp) -> string;
+    rationalTesting(algExp : AlgExp) -> void;
+}
+
+alg2rat(a: AlgExp) -> RatExp{
+    switch (a : AlgExp) {
+        AlgSum(l,r): { 
+            lRational = alg2rat(l);
+            rRational = alg2rat(r);
+            RatExp(
+                sumPoly(
+                    prodPoly(lRational.numerator,rRational.denominator),
+                    prodPoly(rRational.numerator,lRational.denominator)
+                ),
+                prodPoly(lRational.denominator,rRational.denominator)
+            )
+        }
+        AlgRes(l,r): { 
+            lRational = alg2rat(l);
+            rRational = alg2rat(r);
+            RatExp(
+                resPoly(
+                    prodPoly(lRational.numerator,rRational.denominator),
+                    prodPoly(rRational.numerator,lRational.denominator)
+                ),
+                prodPoly(lRational.denominator,rRational.denominator)
+            )
+        }
+        AlgProd(l,r): { 
+            lRational = alg2rat(l);
+            rRational = alg2rat(r);
+            RatExp(
+                prodPoly(lRational.numerator,rRational.numerator),
+                prodPoly(lRational.denominator,rRational.denominator)
+            )
+        }
+        AlgDiv(l,r): { 
+            lRational = alg2rat(l);
+            rRational = alg2rat(r);
+            RatExp(
+                prodPoly(lRational.numerator,rRational.denominator),
+                prodPoly(lRational.denominator,rRational.numerator)
+            )}
+        AlgVar(var): {
+            RatExp(
+                Poly(makeTree1(Monom(makeTree1(var,1)),1)),
+                Poly(makeTree1(Monom(makeTree()),1))
+            );}
+        AlgInt(v): {
+            RatExp(
+                Poly(makeTree1(Monom(makeTree()),v)),
+                Poly(makeTree1(Monom(makeTree()),1))
+            );} 
+    }
+}
+
+sumPoly(l : Poly, r : Poly) -> Poly{
+    Poly(mergeTreeCustom(l.p, r.p, \monom, coef1, coef2 -> coef1 + coef2));
+}
+
+resPoly(l : Poly, r : Poly) -> Poly{
+    Poly(mergeTreeCustom(l.p, r.p, \monom, coef1, coef2 -> coef1 - coef2));
+}
+
+prodMonomOnMonom(m1 : Monom, m2 : Monom){
+    Monom(
+        mergeTreeCustom(
+            m1.m, 
+            m2.m,
+            \key, degree1, degree2 -> degree1 + degree2
+        )
+    )
+}
+
+prodPolyOnMonom(poly : Poly, monom1 : Monom, coefficient1 : int) -> Tree<Monom, int>{
+    //println("prodPoly = " + poly2s(poly) + " monom = " + monom2s(monom1) + " coef = " + i2s(coefficient1));
+    tree = foldTree(
+        poly.p,
+        makeTree(),
+        \monom2, coefficient2, accumulator -> {
+            setTree(
+                accumulator, 
+                prodMonomOnMonom(monom1, monom2),
+                coefficient1*coefficient2
+            )
+        }
+    );
+    //println("prodPolyOnMonom result = " + rtrim2(foldTree(tree, "", \monom,coef,accumulator -> accumulator + i2s(coef) + monom2s(monom) + " + "), "+ "));
+    tree;
+}
+
+prodPoly(l : Poly, r : Poly) -> Poly{
+    Poly(
+        foldTree(
+            l.p, 
+            makeTree(), 
+            \monom1, coef1, accumulator -> {
+                mergeTreeCustom(
+                    accumulator,
+                    prodPolyOnMonom(r,monom1,coef1),
+                    \keyAcc, val1, val2 -> val1 + val2
+                );
+               
+            }
+        )
+    );
+}
+
+degree2s(var : string, degree : int) -> string{
+    if(degree > 0) {
+        "^" + i2s(degree);
+    }
+    else {
+        "";
+    }
+}
+
+monom2s(monom : Monom) -> string{
+    foldTree(monom.m, "", \var,degree,accumulator -> accumulator + var + degree2s(var,degree));
+}
+
+poly2s(poly : Poly)-> string{
+    rtrim2(foldTree(poly.p, "", \monom,coef,accumulator -> accumulator + i2s(coef) + monom2s(monom) + " + "), "+ ");
+}
+
+rat2s(rat:RatExp) -> string{
+    "numerator: " + poly2s(rat.numerator) + "\ndenominator: " + poly2s(rat.denominator);
+}
+
+rationalTesting(algExp : AlgExp) -> void{
+    println("retionalTesting:");
+    println("\talgExp2s: " + alg2s(algExp));
+    rat = alg2rat(algExp);
+    println("\trat2s:\n" + rat2s(rat));
+} 
